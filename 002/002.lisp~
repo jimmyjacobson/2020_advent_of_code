@@ -1,0 +1,13 @@
+(defun validate-password (password policy min max)
+  (let ((count 0))
+    (dotimes (i (- (length password) 1))
+      (if (char-equal policy  (elt password i))
+	  (incf count)))
+    (and (>= count min) (<= count max))))
+
+(defun read-input (filename)
+  (let ((input nil))
+    (with-open-file (in filename)
+      (loop for line = (read in nil)
+         while line do (push line input)))
+    input))

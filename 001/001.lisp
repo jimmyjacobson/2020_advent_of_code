@@ -1,18 +1,8 @@
 ;;https://adventofcode.com/2020/day/1
 
 ;;takes two numbers and returns true if they sum to target, else false
-(defun advent-001p (num1 num2 target)
-  (equal (+ num1 num2) target))
-
 (defun advent-001p-list (numbers target)
   (equal (reduce #'+ numbers) target))
-
-;;takes a list of numbers and a target value and finds the two numbers on the list that sum to the target
-(defun advent-001 (numbers target)
-  (loop named outer for i from 0 to (- (length numbers) 2)
-     do (loop for j from (+ i 1) to (- (length numbers) 1)
-	   do (if (advent-001p (elt numbers i) (elt numbers j) target)
-		  (return-from outer  (list (elt numbers i) (elt numbers j)))))))
 
 (defun util-combinations (list)
   "Takes a list and returns every 2 item combination that exists in the list"
@@ -26,6 +16,7 @@
        (dolist (item (rest list)) (push (list (first list) item) new-list))
        ;;recur with the rest of the list
        (append new-list (util-combinations (rest list)))))))
+     
 
 (defun advent-001-list (numbers target)
   (dolist (combo numbers)
