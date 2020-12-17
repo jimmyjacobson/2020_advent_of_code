@@ -1,0 +1,80 @@
+(in-package :com.jimmyjacobson.aoc2020)
+
+(defclass passport ()
+  ((birth-year
+    :initarg :birth-year
+    :initform (error "Birth year required"))
+   (issue-year
+    :initarg :issue-year
+    :initform (error "Issue year required"))
+   (expiration-year
+    :initarg :expiration-year
+    :initform (error "Expiration year required"))
+   (height
+    :initarg :height
+    :initform (error "Height required"))
+   (hair-color
+    :initarg :hair-color
+    :initform (error "Hair color required"))
+   (eye-color
+    :initarg :eye-color
+    :initform (error "Eye color"))
+   (passport-id
+    :initarg :passport-id
+    :initform (error "Passport id required"))
+   (country-id
+    :initarg :country-id)))
+
+(defparameter *passports* nil)
+
+(defun make-passport (&key byr
+			iyr
+			eyr
+			hgt
+			hcl
+			ecl
+			pid
+			cid)
+  (make-instance 'passport
+		 :birth-year byr
+		 :issue-year iyr
+		 :expiration-year eyr
+		 :height hgt
+		 :hair-color hcl
+		 :eye-color ecl
+		 :passport-id pid
+		 :country-id cid))
+
+(defun print-passport (passport)
+  (with-slots (birth-year issue-year expiration-year height hair-color eye-color passport-id country-id) passport
+      (format t "~a~%" '(birth-year))))
+
+(defun read-char-stream-file (filename)
+      (with-open-file (in filename)
+	(loop for char = (read-char in nil)
+	   while char collect char)))
+
+(defun parse-passport (passport-string)
+  "parse parameters for a passport from a string of format 'byr: iyr: etc'"
+  )
+
+(defparameter *test-data* '("byr:2024" "iyr:2016" "eyr:2034"  "pid:985592671" "hcl:033b48" "hgt:181" "cid:166"))
+
+(ql:quickload "cl-ppcre")
+(defparameter *test-params*
+  (mapcar (lambda (x)
+	    (ppcre:register-groups-bind (a b) ("(\\w+):(\\w+)" x)
+	      (list (read-from-string (concatenate 'string ":" a))  b)))
+	  *test-data*))
+
+(defparameter *p* (apply #'make-passport (flatten-list *test-params*)))
+
+(defun flatten-list (lst)
+  (print lst)
+  (cond
+    ;;terminating case - lst is empty
+    ((null lst) nil)
+    ;;terminating case - lst is an atom, return the atom in a list for appending
+    ((atom lst) (list lst))
+    ;;do something with first of list, and recur on rest
+    (t (append (flatten-list (first lst)) (flatten-list (rest lst))))))
