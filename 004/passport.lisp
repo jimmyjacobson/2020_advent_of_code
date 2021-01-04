@@ -1,70 +1,85 @@
 (defclass passport ()
   ((birth-year
-    :initarg :birth-year
+    :initarg :byr
     :initform (error "Birth Year Required"))
    (issue-year
-    :initarg :issue-year
-    :initform nil)
+    :initarg :iyr
+    :initform (error "Issue Year Required"))
    (expiration-year
-    :initarg :expiration-year
-    :initform nil)
+    :initarg :eyr
+    :initform (error "Expiration Year Required"))
    (height
-    :initarg :height
-    :initform nil)
+    :initarg :hgt
+    :initform (error "Height Required"))
    (hair-color
-    :initarg :hair-color
-    :initform nil)
+    :initarg :hcl
+    :initform (error "Hair Color Required"))
    (eye-color
-    :initarg :eye-color
-    :initform nil)
+    :initarg :ecl
+    :initform (error "Eye Color Required"))
    (passport-id
-    :initarg :passport-id
-    :initform nil)
+    :initarg :pid
+    :initform (error "Passport ID Required"))
    (country-id
-    :initarg :country-id
+    :initarg :cid
     :initform nil)))
 
-(defun make-passport (&key byr
-			iyr
-			eyr
-			hgt
-			hcl
-			ecl
-			pid
-			cid)
-  ;;this is why my object is creating invalid passports, and have to be checked after.
-  ;;need to ensure that only existing params are passed into make-instance
-  (make-instance 'passport
-		 :birth-year byr
-		 :issue-year iyr
-		 :expiration-year eyr
-		 :height hgt
-		 :hair-color hcl
-		 :eye-color ecl
-		 :passport-id pid
-		 :country-id cid))
+(defclass strict-passport (passport)
+  ((is-valid
+    :initform nil)))
 
-(defgeneric valid-passport-p (passport)
-  (:documentation "Generic method for validating passports"))
+(defun make-passport (&rest params)
+  (let ((passport (ignore-errors (apply #'make-instance 'strict-passport params))))
+    (if (not (null passport)) (print-pass passport))
+    passport))
 
-(defmethod valid-passport-p (passport)
+(defmethod initialize-instance :after ((passport strict-passport) &key)
   (with-slots (birth-year
-		     issue-year
-		     expiration-year
-		     height
-		     hair-color
-		     eye-color
-		     passport-id)
+	       issue-year
+	       expiration-year
+	       height
+	       hair-color
+	       eye-color
+	       passport-id
+	       is-valid)
       passport
-    (and (not (null birth-year))
-	 (not (null issue-year))
-	 (not (null expiration-year))
-	 (not (null height))
-	 (not (null hair-color))
-	 (not (null eye-color))
-	 (not (null passport-id)))))
+    (setf is-valid
+	  (and (validate-integer birth-year 1920 2002)
+	       (validate-integer issue-year 2010 2020)
+	       (validate-integer expiration-year 2020 2030)
+	       (validate-height height)
+	       (validate-hair-color hair-color)
+	       (validate-eye-color eye-color)
+	       (validate-passport-id passport-id)))))
 
-(defun print-passport (passport)
+(defun validate-integer (data min max)
+  (let ((num (parse-integer data)))
+    (and num
+	 (>= num min)
+	 (<= num max))))
+
+(ql:quickload "cl-ppcre")
+(defun validate-height (data)
+  (ppcre:register-groups-bind (num unit) ("^(\\d+)(in|cm)$" data)
+    (cond
+      ((string-equal unit "in")
+       (validate-integer num 59 76))
+       ((string-equal unit "cm")
+	(validate-integer num 150 193))
+       (t nil))))
+
+(defun validate-hair-color (data)
+  (not (null (ppcre:scan "^#[0-9a-f]{6}$" data))))
+
+(defun validate-eye-color (data)
+  (not (null (ppcre:scan "^(?:amb|blu|brn|gry|grn|hzl|oth)$" data))))
+
+(defun validate-passport-id (data)
+  (not (null (ppcre:scan "^[0-9]{9}$" data))))
+			        
+(defgeneric print-pass (passport))
+
+(defmethod print-pass (passport)
   (with-slots (birth-year issue-year expiration-year height hair-color eye-color passport-id country-id) passport
     (format t "Birth Year: ~a~%" birth-year)
     (format t "Issue Year: ~a~%" issue-year)
@@ -73,7 +88,20 @@
     (format t "Hair Color: ~a~%" hair-color)
     (format t "Eye Color: ~a~%" eye-color)
     (format t "Passport Id: ~a~%" passport-id)
-    (format t "Country Id: ~a~%" country-id)))
+    (format t "Country Id: ~a~%~%" country-id)))
+
+(defmethod print-pass ((passport strict-passport))
+  (with-slots (birth-year issue-year expiration-year height hair-color eye-color passport-id country-id is-valid) passport
+    (format t "Birth Year: ~a~%" birth-year)
+    (format t "Issue Year: ~a~%" issue-year)
+    (format t "Exp Year: ~a~%" expiration-year)
+    (format t "Height: ~a~%" height)
+    (format t "Hair Color: ~a~%" hair-color)
+    (format t "Eye Color: ~a~%" eye-color)
+    (format t "Passport Id: ~a~%" passport-id)
+    (format t "Country Id: ~a~%" country-id)
+    (format t "Is Valid? ~a~%~%" is-valid)))
+
 
 (defun flatten-list (lst)
   (cond

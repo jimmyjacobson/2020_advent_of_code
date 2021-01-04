@@ -14,8 +14,22 @@
 			(list (read-from-string (concatenate 'string ":" a))  b)))
 			(cl-ppcre:split "\\s" passport))))
 
+;;My approach is to use CLOS and objects to only create valid passports and then count how many were created
 (defun main (filename)
   (loop for passport in (convert-passports-to-lists (read-passports filename))
-	       counting (valid-passport-p (make-passport-from-params passport))))
+	counting  (make-passport-from-params passport)))
+
+(defun main2 (filename)
+  (let ((passports nil)
+	(passport nil))
+    (setf passports
+	  (loop for passport-params in (convert-passports-to-lists (read-passports filename))
+		do (setf passport (make-passport-from-params passport-params))
+		when (and
+		      (not (null passport))
+		      (not (null (slot-value passport 'is-valid))))
+		  collect passport))
+	  passports))
 
 
+  
