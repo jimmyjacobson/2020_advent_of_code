@@ -39,6 +39,13 @@
     (+ (* (bsp-traversal rows (populate-list 0 127)) 8)
        (bsp-traversal seats (populate-list 0 7)))))
 
+;;this is the main problem function for part 1
 (defun find-max-boarding-pass (filename)
   (loop for str in (uiop:read-file-lines filename)
 	maximize (process-boarding-pass str)))
+
+;; find missing ids for part 2
+(defun find-missing-ids (filename)
+  (set-difference (populate-list 85 890)
+		(loop for str in (uiop:read-file-lines filename)
+		      collecting (process-boarding-pass str))))
