@@ -1,0 +1,3 @@
+(defun make-tree (item)
+  "creates a new node with a value of item"
+  (cons (cons item nil) nil))

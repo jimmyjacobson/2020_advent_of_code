@@ -1,0 +1,4 @@
+(defparameter *rules* 
+  '(("light red bag" . '( ( "bright white bag" . 1 ) ( "muted yellow bag" . 2 ) ) )
+    ("dark orange bag" . '( ( "bright white bag" . 3 ) ( "muted yellow bag " . 4 ) ) )
+    ("bright white bag" . '( ( "shiny gold bag" . 1 ) ) ) ))

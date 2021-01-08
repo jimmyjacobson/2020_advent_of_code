@@ -1,0 +1,9 @@
+Day 7 looks like a search problem where the search space is defined by expansions of one bag into multiple bags based on color type.  For example:
+
+`light red bags contain 1 bright white bag, 2 muted yellow bags.`
+
+I think this will lend itself to the cons structure like so
+
+```
+'(" light red bag" . '( ( "bright white bag" . 1 ) ( "muted yellow bag" . 2 ) ) )
+```
